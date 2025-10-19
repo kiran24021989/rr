@@ -1,0 +1,49 @@
+# --- Auto GitHub Push Script ---
+Write-Host "🚀 Auto GitHub Upload Script Starting..." -ForegroundColor Cyan
+
+# === Check Git Installation ===
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host "Git not found! Installing Git..." -ForegroundColor Yellow
+    Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/latest/download/Git-2.45.2-64-bit.exe" -OutFile "$env:TEMP\git_installer.exe"
+    Start-Process "$env:TEMP\git_installer.exe" -ArgumentList "/VERYSILENT", "/NORESTART" -Wait
+    Write-Host "✅ Git installed successfully. Please restart PowerShell if you see errors." -ForegroundColor Green
+}
+
+# === Gather Info ===
+$githubUser = Read-Host "Enter your GitHub username"
+$repoName = Read-Host "Enter a new repository name (example: telegram-bot)"
+$token = Read-Host "Enter your GitHub Personal Access Token (paste here, hidden)" -AsSecureString
+$tokenPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($token))
+
+# === Create Repo on GitHub ===
+$createRepoUrl = "https://api.github.com/user/repos"
+$body = @{
+    name = $repoName
+    private = $false
+} | ConvertTo-Json
+
+Write-Host "📦 Creating repository on GitHub..."
+$response = Invoke-RestMethod -Uri $createRepoUrl -Headers @{Authorization = "token $tokenPlain"; "User-Agent" = $githubUser} -Method POST -Body $body
+
+if ($response.clone_url) {
+    Write-Host "✅ Repo created: $($response.clone_url)" -ForegroundColor Green
+} else {
+    Write-Host "❌ Failed to create repo. Check token permissions." -ForegroundColor Red
+    exit
+}
+
+# === Initialize Git Repo Locally ===
+if (Test-Path ".git") {
+    Write-Host "🔁 Git repo already initialized."
+} else {
+    git init
+}
+
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote remove origin -ErrorAction SilentlyContinue
+git remote add origin $response.clone_url
+git push -u origin main
+
+Write-Host "✅ All done! Your bot is now on GitHub: $($response.html_url)" -ForegroundColor Green
