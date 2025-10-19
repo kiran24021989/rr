@@ -1,9 +1,9 @@
 # ==============================================
-#   Auto Git Push + Fly.io Deploy Script 🚀
+# Auto Git Push + Railway Deploy Script 🚀
+# Works with @railway/cli
 # ==============================================
 
 $repoPath = "C:\Users\kiran\telegram-bot\telegram-bot"
-$flyAppName = "telegram-bot-kiran"
 
 # --- Change directory ---
 Set-Location $repoPath
@@ -37,8 +37,13 @@ if ($(git status --porcelain) -ne "") {
 # --- Push to GitHub ---
 git push origin main
 
-# --- Deploy to Fly.io ---
-Write-Host "`nDeploying to Fly.io..."
-flyctl deploy -a $flyAppName
+# --- Deploy to Railway ---
+Write-Host "`nDeploying to Railway..."
+# The new CLI uses the same 'railway up' command
+try {
+    railway up
+} catch {
+    Write-Host "Ensure you are logged in to Railway CLI and your project is linked." -ForegroundColor Red
+}
 
-Write-Host "`n✅ Done! Bot updated and deployed." -ForegroundColor Green
+Write-Host "`n✅ Done! Bot updated and deployed on Railway." -ForegroundColor Green
