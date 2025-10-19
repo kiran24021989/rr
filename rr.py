@@ -6,7 +6,7 @@ from telegram.ext import (
     MessageHandler, filters, ContextTypes
 )
 import os
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 # ------------------- Logging -------------------
 logging.basicConfig(level=logging.INFO)
