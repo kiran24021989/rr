@@ -1325,7 +1325,7 @@ async def handle_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text(chunk, parse_mode="Markdown")
 # ------------------- Main -------------------
 def main():
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    app = ApplicationBuilder().token(TOKEN).build()
 
     # Start
     app.add_handler(CommandHandler("start", start))
